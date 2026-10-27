@@ -18,13 +18,13 @@ The figures below are preserved from the original research rather than regenerat
 
 ### Short-term MVRV / NUPL normalization example
 
-![Historical Short-Term MVRV NUPL normalization diagnostic](docs/historical_short_term_mvrv_nupl.jpg)
+![Historical Short-Term MVRV NUPL normalization diagnostic](docs/historical_short_term_mvrv_nupl.png)
 
 This four-panel diagnostic shows the original workflow on a real historical indicator: inspect the raw series and its moving statistics, inspect the raw skewed distribution, transform/standardize it, and then visualize the standardized valuation state against Bitcoin price. The probability-plot panel was used as a visual diagnostic of how close the transformed distribution came to normality.
 
 ### Historical aggregate valuation prototype
 
-![Historical aggregate Bitcoin valuation prototype](docs/historical_aggregate_valuation.jpg)
+![Historical aggregate Bitcoin valuation prototype](docs/historical_aggregate_valuation.png)
 
 This later chart shows the early multi-indicator aggregate from the medium-term prototype. It should be read as an exploratory historical state measure, not a trading signal. The original write-up explicitly noted that early dates were sometimes based on only one or two available indicators and concluded that the aggregate did **not** show consistent actionable insights on its own.
 
@@ -128,8 +128,8 @@ These limitations are central to the project: the useful output is the transform
 ├── README.md
 ├── requirements.txt
 ├── docs/
-│   ├── historical_aggregate_valuation.jpg
-│   ├── historical_short_term_mvrv_nupl.jpg
+│   ├── historical_aggregate_valuation.png
+│   ├── historical_short_term_mvrv_nupl.png
 │   └── research_history.md
 ├── examples/
 │   ├── README.md

@@ -1,5 +1,7 @@
 # Statistical Market Valuation
 
+[![Validate valuation pipeline](https://github.com/soulidisath/statistical-market-valuation/actions/workflows/validate.yml/badge.svg)](https://github.com/soulidisath/statistical-market-valuation/actions/workflows/validate.yml)
+
 Personal research project exploring how heterogeneous Bitcoin on-chain, sentiment, and derivatives indicators can be transformed onto a more comparable statistical scale and combined into a descriptive valuation score.
 
 The repository is a cleaned version of exploratory notebook work. It focuses on **normalization, transformation choice, signal aggregation, and the limitations of those choices**. It is not a production valuation model and it does not claim that the composite predicts returns or identifies repeatable market-timing opportunities.
@@ -12,9 +14,18 @@ Different market indicators live on very different scales and distributions. The
 
 The original work experimented with rolling z-scores, smoothing, power transforms, Box-Cox, Yeo-Johnson, and rank-based Gaussian normalization before averaging the resulting component scores.
 
+## Research evolution
+
+There were two related stages of the work:
+
+1. **Medium-term prototype** — an earlier write-up built a five-indicator valuation composite and focused heavily on making heterogeneous inputs easier to compare through moving z-scores, transformation, and smoothing.
+2. **Later notebook expansion** — the subsequent exploratory notebook broadened the research to eight signal families and added more indicator-specific transformations.
+
+The cleaned repository primarily reconstructs the later executable notebook while retaining the methodology and lessons from the earlier prototype. Keeping those stages separate matters: the five-indicator report and the eight-series notebook should not be read as one single frozen model specification.
+
 ## Original research inputs
 
-The notebook worked with eight signal families:
+The later notebook worked with eight signal families:
 
 - short-term holder profit/loss / NUPL-style data;
 - retail-interest data;
@@ -26,6 +37,25 @@ The notebook worked with eight signal families:
 - futures funding rates.
 
 Some of the original series came from credentialed or third-party analytics sources. Their raw data and credentials are **not redistributed** in this repository. The cleaned code accepts a pandas DataFrame containing the required input series, while the included demo uses deterministic synthetic data purely to show the mechanics.
+
+## What the original medium-term prototype did
+
+The earlier research write-up identified four recurring problems in raw indicator series: **variable volatility, trend, skewness, and noise**. The workflow used:
+
+- moving z-scores to adapt the reference mean and volatility through time;
+- logarithms, roots, powers, Box-Cox, and Yeo-Johnson transforms to reduce skewness;
+- moving averages to reduce noise; and
+- an automatic search routine to compare candidate normalization choices.
+
+The normalization search had three levels:
+
+- **Level 1:** test multiple moving-z-score lengths;
+- **Level 2:** test multiple transformations and corresponding z-score lengths;
+- **Level 3:** additionally test smoothing lengths.
+
+Candidate transformations were ranked using normality-test p-values. In the cleaned repository this is preserved only as a **heuristic search device**. A z-score itself does not require normally distributed data; normality becomes relevant when translating standardized values into probabilities under a normal model.
+
+The original Short-Term MVRV/NUPL diagnostic illustrated the full idea visually: raw indicator and moving statistics, a strongly skewed raw histogram, the transformed distribution/probability plot, and the resulting standardized state plotted against Bitcoin price.
 
 ## What is implemented
 
@@ -44,7 +74,7 @@ The original sign convention is retained: many scores are inverted so that a lar
 
 ### 2. Indicator-specific normalization pipeline
 
-`src/valuation.py` reconstructs the executable transformations used in the notebook:
+`src/valuation.py` reconstructs the executable transformations used in the later notebook:
 
 | Component | Cleaned executable specification |
 | --- | --- |
@@ -65,6 +95,17 @@ The component scores can then be averaged with `aggregate_valuation()`. The clea
 
 This is a **heuristic search tool**, not a statistically rigorous model-selection rule. Averaging p-values across different tests has no special theoretical justification; it was used as a practical way to rank candidate transformations during exploration.
 
+## What the original research concluded
+
+The most important result was not a spectacular backtest. The original medium-term write-up explicitly noted that:
+
+- the earliest aggregate values were based on only one or two available indicators and were therefore unreliable;
+- the prototype was still primitive;
+- no consistent actionable insight was visible from the valuation composite by itself; and
+- the measure might be more useful as **confluence** alongside the trend/TPI and liquidity research.
+
+That negative result is retained intentionally. The project is more credible as an example of testing an idea and finding its limits than it would be if the historical chart were presented as evidence of a reliable trading edge.
+
 ## Reproducible demonstration
 
 The original raw indicator history cannot be redistributed cleanly, so `examples/synthetic_demo.py` generates deterministic synthetic series with deliberately different distributions and runs them through the same cleaned transformation pipeline.
@@ -83,7 +124,7 @@ python examples/synthetic_demo.py
 
 ## Important notebook discrepancy
 
-One markdown note in the original notebook described the STH SOPR transformation as a **-2 power transform with a 465-day moving z-score**. The executable cell instead applied a **30-day rolling mean, Box-Cox transform, and 170-day moving z-score**.
+One markdown note in the later notebook described the STH SOPR transformation as a **-2 power transform with a 465-day moving z-score**. The executable cell instead applied a **30-day rolling mean, Box-Cox transform, and 170-day moving z-score**.
 
 The cleaned repository follows the executable code and documents the disagreement rather than silently choosing whichever description sounds cleaner.
 
@@ -93,6 +134,7 @@ The cleaned repository follows the executable code and documents the disagreemen
 - Rank-Gaussian normalization and the full-sample SSR z-score, as originally implemented, use the **entire available sample**. They therefore contain look-ahead information if interpreted as historical walk-forward signals.
 - The indicator set has unequal history. A simple average can change meaning as new components become available; the cleaned code makes breadth explicit but does not solve that structural issue.
 - A more Gaussian-looking indicator is not automatically a better valuation signal.
+- Normality-test p-values are not a measure of economic usefulness or predictive power.
 - The aggregate score was exploratory and was not established as a robust forecasting or trading model.
 - Third-party data definitions can change and may require licensed or authenticated access.
 
@@ -107,6 +149,8 @@ These limitations are central to the project: the useful output is the transform
 │       └── validate.yml
 ├── README.md
 ├── requirements.txt
+├── docs/
+│   └── research_history.md
 ├── examples/
 │   ├── README.md
 │   ├── synthetic_demo.py

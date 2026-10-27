@@ -12,6 +12,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: valuation-figures-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -39,15 +43,20 @@ jobs:
           git add examples/output/*.svg
           if git diff --cached --quiet; then
             echo "No figure changes to commit."
-          else
-            git commit -m "Refresh reproducible valuation figures"
-            for attempt in 1 2 3; do
-              git fetch origin main
-              git rebase origin/main
-              if git push origin HEAD:main; then
-                exit 0
-              fi
-              sleep 2
-            done
-            exit 1
+            exit 0
           fi
+
+          git commit -m "Refresh reproducible valuation figures"
+          if git push origin HEAD:main; then
+            exit 0
+          fi
+
+          # A concurrent earlier run may already have pushed identical figures.
+          git fetch origin main
+          if git diff --quiet origin/main -- examples/output; then
+            echo "Remote already contains the generated figures."
+            exit 0
+          fi
+
+          git rebase origin/main
+          git push origin HEAD:main
